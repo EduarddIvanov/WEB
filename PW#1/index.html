@@ -1,0 +1,139 @@
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Калькулятори для розрахунку складу палива</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('calculator1')">Завдання 1</button>
+            <button class="tab-btn" onclick="showTab('calculator2')">Завдання 2</button>
+        </div>
+
+        <!-- Калькулятор 1 -->
+        <div id="calculator1" class="calculator">
+            <h1>Калькулятор складу палива</h1>
+            
+            <div class="input-group">
+                <h2>Вхідні дані (робоча маса)</h2>
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="hp">H<sup>P</sup>, %</label>
+                        <input type="number" id="hp" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="cp">C<sup>P</sup>, %</label>
+                        <input type="number" id="cp" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="sp">S<sup>P</sup>, %</label>
+                        <input type="number" id="sp" step="0.1" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="np">N<sup>P</sup>, %</label>
+                        <input type="number" id="np" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="op">O<sup>P</sup>, %</label>
+                        <input type="number" id="op" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="wp">W<sup>P</sup>, %</label>
+                        <input type="number" id="wp" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="ap">A<sup>P</sup>, %</label>
+                        <input type="number" id="ap" step="0.1" required>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="calculate1()">Розрахувати</button>
+
+            <div id="results1" class="results" style="display: none;">
+                <h3>Результати розрахунку:</h3>
+                <div id="coefficients">
+                    <p>Коефіцієнт переходу від робочої до сухої маси: <span id="kpc"></span></p>
+                    <p>Коефіцієнт переходу від робочої до горючої маси: <span id="kpg"></span></p>
+                </div>
+                
+                <h4>Склад сухої маси:</h4>
+                <div id="dryMass"></div>
+                
+                <h4>Склад горючої маси:</h4>
+                <div id="combustibleMass"></div>
+                
+                <h4>Теплота згоряння:</h4>
+                <div id="heatingValue"></div>
+            </div>
+
+            <div id="error1" class="error" style="display: none;"></div>
+        </div>
+
+        <!-- Калькулятор 2 -->
+        <div id="calculator2" class="calculator" style="display: none;">
+            <h1>Калькулятор для перерахунку складу мазуту</h1>
+            
+            <div class="input-group">
+                <h2>Вхідні дані (горюча маса)</h2>
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="cg2">Вуглець, %</label>
+                        <input type="number" id="cg2" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="hg2">Водень, %</label>
+                        <input type="number" id="hg2" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="og2">Кисень, %</label>
+                        <input type="number" id="og2" step="0.1" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="sg2">Сірка, %</label>
+                        <input type="number" id="sg2" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="qdaf">Q<sup>daf</sup><sub>i</sub>, МДж/кг</label>
+                        <input type="number" id="qdaf" step="0.1" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="wr2">Вологість робочої маси, %</label>
+                        <input type="number" id="wr2" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="ad2">Зольність сухої маси, %</label>
+                        <input type="number" id="ad2" step="0.1" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="v2">Вміст ванадію, мг/кг</label>
+                        <input type="number" id="v2" step="0.1" required>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="calculate2()">Розрахувати</button>
+
+            <div id="results2" class="results" style="display: none;">
+                <h3>Результати розрахунку:</h3>
+                <h4>Склад робочої маси мазуту:</h4>
+                <div id="workingMass"></div>
+                
+                <h4>Теплота згоряння:</h4>
+                <div id="heatingValue2"></div>
+            </div>
+
+            <div id="error2" class="error" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

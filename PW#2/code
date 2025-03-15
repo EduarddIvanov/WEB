@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор викидів</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .fuel-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        input[type="number"] {
+            width: 150px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #e8f4f8;
+        }
+        .result-item {
+            margin-bottom: 10px;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Калькулятор валових викидів шкідливих речовин</h1>
+    <p>Цей калькулятор розраховує валові викиди шкідливих речовин у вигляді суспендованих твердих частинок при спалюванні вугілля, мазуту та природного газу.</p>
+    
+    <div class="container">
+        <div class="fuel-section">
+            <h2>Введення маси палива</h2>
+            <div class="input-group">
+                <label for="coal-amount">Кількість вугілля (т):</label>
+                <input type="number" id="coal-amount" value="1096363">
+            </div>
+            
+            <div class="input-group">
+                <label for="mazut-amount">Кількість мазуту (т):</label>
+                <input type="number" id="mazut-amount" value="70945">
+            </div>
+            
+            <div class="input-group">
+                <label for="gas-amount">Кількість газу (тис. м³):</label>
+                <input type="number" id="gas-amount" value="84762">
+            </div>
+        </div>
+        
+        <button onclick="calculateEmissions()">Розрахувати</button>
+        
+        <div class="results" id="results">
+            <h2>Результати розрахунків</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Паливо</th>
+                        <th>Показник емісії (г/ГДж)</th>
+                        <th>Валовий викид (т)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Вугілля</td>
+                        <td id="coal-emission-factor">-</td>
+                        <td id="coal-gross-emission">-</td>
+                    </tr>
+                    <tr>
+                        <td>Мазут</td>
+                        <td id="mazut-emission-factor">-</td>
+                        <td id="mazut-gross-emission">-</td>
+                    </tr>
+                    <tr>
+                        <td>Природний газ</td>
+                        <td id="gas-emission-factor">-</td>
+                        <td id="gas-gross-emission">-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Загальний викид</strong></td>
+                        <td>-</td>
+                        <td id="total-gross-emission"><strong>-</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+
+function calculateEmissions() {
+    // Отримання значень з полів введення
+    const B_coal = parseFloat(document.getElementById("coal-amount").value);
+    const B_mazut = parseFloat(document.getElementById("mazut-amount").value);
+    const B_gas = parseFloat(document.getElementById("gas-amount").value);
+
+    // Нижча теплота згоряння, МДж/кг
+    const Qr_coal = 20.47;
+    const Qr_mazut = 39.48;
+    const Qr_gas = 33.08;
+
+    // Показники емісії, г/ГДж
+    const k_tv_coal = 150;
+    const k_tv_mazut = 0.57;
+    const k_tv_gas = 0;
+
+    // Валові викиди, т
+    const E_coal = 1e-6 * k_tv_coal * Qr_coal * B_coal;
+    const E_mazut = 1e-6 * k_tv_mazut * Qr_mazut * B_mazut;
+    const E_gas = 1e-6 * k_tv_gas * Qr_gas * B_gas * 1000 * 0.723;
+
+    // Оновлення результатів у таблиці
+    document.getElementById('coal-emission-factor').textContent = k_tv_coal.toFixed(2);
+    document.getElementById('coal-gross-emission').textContent = E_coal.toFixed(2);
+
+    document.getElementById('mazut-emission-factor').textContent = k_tv_mazut.toFixed(2);
+    document.getElementById('mazut-gross-emission').textContent = E_mazut.toFixed(2);
+
+    document.getElementById('gas-emission-factor').textContent = k_tv_gas.toFixed(3);
+    document.getElementById('gas-gross-emission').textContent = E_gas.toFixed(2);
+
+    // Розрахунок загального викиду
+    const totalEmissions = E_coal + E_mazut + E_gas;
+    document.getElementById('total-gross-emission').textContent = totalEmissions.toFixed(2);
+}
+;
+
+
+    </script>
+</body>
+</html>

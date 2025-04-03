@@ -1,1 +1,289 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор прибутку сонячної електростанції</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2a6496;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 5px solid #2a6496;
+        }
+        .input-help {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 2px;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #2a6496;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            animation: fadeEffect 1s;
+        }
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор прибутку від сонячних електростанцій</h1>
+        <p>Цей калькулятор допоможе розрахувати прибуток від сонячних електростанцій з встановленою системою прогнозування сонячної потужності.</p>
+        
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'calculator')">Калькулятор</button>
+        </div>
+        
+        <div id="calculator" class="tabcontent" style="display: block;">
+            <form id="calculatorForm">
+                <div class="form-group">
+                    <label for="capacity">Встановлена потужність сонячної електростанції (кВт):</label>
+                    <input type="number" id="capacity" name="capacity" min="0" step="0.1" required value="100">
+                    <div class="input-help">Вкажіть загальну встановлену потужність СЕС в кіловатах</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="generationPerKw">Середньорічна генерація на 1 кВт встановленої потужності (кВт·год):</label>
+                    <input type="number" id="generationPerKw" name="generationPerKw" min="0" step="0.1" required value="1200">
+                    <div class="input-help">Для України зазвичай 1100-1400 кВт·год на рік з 1 кВт встановленої потужності</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tariff">Тариф "зеленої" енергії (грн/кВт·год):</label>
+                    <input type="number" id="tariff" name="tariff" min="0" step="0.01" required value="4.28">
+                    <div class="input-help">Актуальний тариф для сонячних електростанцій</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="forecastAccuracy">Точність прогнозування без системи (%):</label>
+                    <input type="number" id="forecastAccuracy" name="forecastAccuracy" min="0" max="100" step="0.1" required value="75">
+                    <div class="input-help">Середня точність прогнозування без спеціальної системи</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="forecastAccuracyWithSystem">Точність прогнозування з системою (%):</label>
+                    <input type="number" id="forecastAccuracyWithSystem" name="forecastAccuracyWithSystem" min="0" max="100" step="0.1" required value="90">
+                    <div class="input-help">Точність прогнозування із встановленою системою</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="penaltyRate">Штрафна ставка за небаланс (%):</label>
+                    <input type="number" id="penaltyRate" name="penaltyRate" min="0" max="100" step="0.1" required value="15">
+                    <div class="input-help">Відсоток штрафу від тарифу за невідповідність прогнозу</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="systemCost">Вартість системи прогнозування (грн):</label>
+                    <input type="number" id="systemCost" name="systemCost" min="0" step="1000" required value="150000">
+                    <div class="input-help">Вартість придбання та встановлення системи прогнозування</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="systemMaintenance">Річне обслуговування системи (грн/рік):</label>
+                    <input type="number" id="systemMaintenance" name="systemMaintenance" min="0" step="1000" required value="15000">
+                    <div class="input-help">Вартість обслуговування системи прогнозування на рік</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="operationYears">Розрахунковий період експлуатації (років):</label>
+                    <input type="number" id="operationYears" name="operationYears" min="1" max="30" step="1" required value="10">
+                    <div class="input-help">Кількість років для розрахунку окупності</div>
+                </div>
+                
+                <button type="button" class="button" onclick="calculateProfit()">Розрахувати</button>
+            </form>
+            
+            <div id="results" class="results" style="display: none;">
+                <h3>Результати розрахунку:</h3>
+                <div id="resultContent"></div>
+            </div>
+        </div>
+        
+    </div>
 
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        function calculateProfit() {
+            const capacity = parseFloat(document.getElementById("capacity").value);
+            const generationPerKw = parseFloat(document.getElementById("generationPerKw").value);
+            const tariff = parseFloat(document.getElementById("tariff").value);
+            const forecastAccuracy = parseFloat(document.getElementById("forecastAccuracy").value) / 100;
+            const forecastAccuracyWithSystem = parseFloat(document.getElementById("forecastAccuracyWithSystem").value) / 100;
+            const penaltyRate = parseFloat(document.getElementById("penaltyRate").value) / 100;
+            const systemCost = parseFloat(document.getElementById("systemCost").value);
+            const systemMaintenance = parseFloat(document.getElementById("systemMaintenance").value);
+            const operationYears = parseInt(document.getElementById("operationYears").value);
+            
+            const annualGeneration = capacity * generationPerKw;
+            const annualRevenue = annualGeneration * tariff;
+            const penaltyWithoutSystem = annualGeneration * (1 - forecastAccuracy) * tariff * penaltyRate;
+            const penaltyWithSystem = annualGeneration * (1 - forecastAccuracyWithSystem) * tariff * penaltyRate;
+            const profitWithoutSystem = annualRevenue - penaltyWithoutSystem;
+            const profitWithSystem = annualRevenue - penaltyWithSystem - systemMaintenance;
+            const additionalProfit = profitWithSystem - profitWithoutSystem;
+            const paybackPeriod = systemCost / additionalProfit;
+            const totalProfitWithoutSystem = profitWithoutSystem * operationYears;
+            const totalProfitWithSystem = (profitWithSystem * operationYears) - systemCost;
+            const totalAdditionalProfit = totalProfitWithSystem - totalProfitWithoutSystem;
+    
+            let resultHTML = `
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse: collapse;">
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Параметр</th>
+                            <th style="padding: 10px; text-align: right; border: 1px solid #ddd;">Значення</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Річне виробництво електроенергії</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${annualGeneration.toFixed(2)} кВт·год</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Річний дохід (без штрафів)</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${annualRevenue.toFixed(2)} грн</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Штрафи без системи прогнозування</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${penaltyWithoutSystem.toFixed(2)} грн/рік</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Штрафи з системою прогнозування</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${penaltyWithSystem.toFixed(2)} грн/рік</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Зменшення штрафів</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${(penaltyWithoutSystem - penaltyWithSystem).toFixed(2)} грн/рік</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Річний прибуток без системи</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${profitWithoutSystem.toFixed(2)} грн/рік</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Річний прибуток з системою</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${profitWithSystem.toFixed(2)} грн/рік</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Додатковий річний прибуток</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; font-weight: bold; color: ${additionalProfit > 0 ? 'green' : 'red'};">${additionalProfit.toFixed(2)} грн/рік</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Період окупності системи</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; font-weight: bold;">${paybackPeriod.toFixed(2)} років</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Загальний прибуток за ${operationYears} років без системи</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${totalProfitWithoutSystem.toFixed(2)} грн</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Загальний прибуток за ${operationYears} років з системою</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${totalProfitWithSystem.toFixed(2)} грн</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Додатковий прибуток за ${operationYears} років</td>
+                            <td style="padding: 10px; text-align: right; border: 1px solid #ddd; font-weight: bold; color: ${totalAdditionalProfit > 0 ? 'green' : 'red'};">${totalAdditionalProfit.toFixed(2)} грн</td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <div style="font-weight: bold; margin-bottom: 10px;">Висновок:</div>
+                    ${paybackPeriod <= operationYears 
+                        ? `<div style="color: green;">Система окупиться за ${paybackPeriod.toFixed(2)} років, що менше за розрахунковий період експлуатації (${operationYears} років). Встановлення системи прогнозування є економічно вигідним.</div>`
+                        : `<div style="color: red;">Система окупиться за ${paybackPeriod.toFixed(2)} років, що більше за розрахунковий період експлуатації (${operationYears} років). Встановлення системи прогнозування є економічно невигідним при заданих параметрах.</div>`
+                    }
+                </div>
+            `;
+            
+            document.getElementById("resultContent").innerHTML = resultHTML;
+            document.getElementById("results").style.display = "block";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор КЗ і перевірка стійкості</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .tab {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: none;
+            transition: 0.3s;
+            font-size: 16px;
+            border-radius: 5px 5px 0 0;
+            margin-right: 2px;
+        }
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+        .tab-button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 5px solid #4CAF50;
+        }
+        .output-value {
+            font-weight: bold;
+            color: #333;
+        }
+        .stability-result {
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .stable {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+        .unstable {
+            background-color: #ffcdd2;
+            color: #c62828;
+        }
+        .formula {
+            font-style: italic;
+            margin: 10px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор КЗ і перевірка стійкості</h1>
+        
+        <div class="tab">
+            <button class="tab-button active" onclick="openTab(event, 'threephase')">Трифазне КЗ</button>
+            <button class="tab-button" onclick="openTab(event, 'singlephase')">Однофазне КЗ</button>
+            <button class="tab-button" onclick="openTab(event, 'stability')">Перевірка стійкості</button>
+        </div>
+
+        <!-- Трифазне КЗ -->
+        <div id="threephase" class="tab-content" style="display: block;">
+            <h2>Розрахунок струму трифазного короткого замикання</h2>
+            <div class="formula">
+                I<sub>КЗ3</sub> = U<sub>ном</sub> / (√3 × Z<sub>сум</sub>)
+            </div>
+            <form id="threephase-form">
+                <div class="form-group">
+                    <label for="nominal-voltage">Номінальна напруга U<sub>ном</sub> (кВ):</label>
+                    <input type="number" id="nominal-voltage" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="total-impedance">Сумарний опір мережі Z<sub>сум</sub> (Ом):</label>
+                    <input type="number" id="total-impedance" step="0.01" required>
+                </div>
+                <button type="button" onclick="calculateThreePhase()">Розрахувати</button>
+            </form>
+            <div id="threephase-result" class="result" style="display: none;">
+                <h3>Результат:</h3>
+                <p>Струм трифазного КЗ (I<sub>КЗ3</sub>): <span id="threephase-current" class="output-value"></span> кА</p>
+            </div>
+        </div>
+
+        <!-- Однофазне КЗ -->
+        <div id="singlephase" class="tab-content">
+            <h2>Розрахунок струму однофазного короткого замикання</h2>
+            <div class="formula">
+                I<sub>КЗ1</sub> = 3 × U<sub>ф</sub> / (Z<sub>1</sub> + Z<sub>2</sub> + Z<sub>0</sub>)
+            </div>
+            <form id="singlephase-form">
+                <div class="form-group">
+                    <label for="phase-voltage">Фазна напруга U<sub>ф</sub> (кВ):</label>
+                    <input type="number" id="phase-voltage" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="z1">Опір прямої послідовності Z<sub>1</sub> (Ом):</label>
+                    <input type="number" id="z1" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="z2">Опір зворотної послідовності Z<sub>2</sub> (Ом):</label>
+                    <input type="number" id="z2" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="z0">Опір нульової послідовності Z<sub>0</sub> (Ом):</label>
+                    <input type="number" id="z0" step="0.01" required>
+                </div>
+                <button type="button" onclick="calculateSinglePhase()">Розрахувати</button>
+            </form>
+            <div id="singlephase-result" class="result" style="display: none;">
+                <h3>Результат:</h3>
+                <p>Струм однофазного КЗ (I<sub>КЗ1</sub>): <span id="singlephase-current" class="output-value"></span> кА</p>
+            </div>
+        </div>
+
+        <!-- Перевірка стійкості -->
+        <div id="stability" class="tab-content">
+            <h2>Перевірка на термічну і динамічну стійкість</h2>
+            
+            <form id="stability-form">
+                <h3>Вхідні дані</h3>
+                <div class="form-group">
+                    <label for="short-circuit-current">Струм КЗ (I<sub>КЗ</sub>) (кА):</label>
+                    <input type="number" id="short-circuit-current" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="pulse-coefficient">Ударний коефіцієнт (k<sub>уд</sub>):</label>
+                    <input type="number" id="pulse-coefficient" step="0.01" value="1.8" required>
+                </div>
+                <div class="form-group">
+                    <label for="thermal-time">Тривалість КЗ (t) (с):</label>
+                    <input type="number" id="thermal-time" step="0.1" value="1.0" required>
+                </div>
+                
+                <h3>Параметри обладнання</h3>
+                <div class="form-group">
+                    <label for="dynamic-stability">Динамічна стійкість обладнання (i<sub>дин</sub>) (кА):</label>
+                    <input type="number" id="dynamic-stability" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="thermal-stability">Термічна стійкість обладнання (I<sub>т</sub>) (кА):</label>
+                    <input type="number" id="thermal-stability" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="thermal-time-equipment">Час термічної стійкості обладнання (t<sub>т</sub>) (с):</label>
+                    <input type="number" id="thermal-time-equipment" step="0.1" value="1.0" required>
+                </div>
+                
+                <button type="button" onclick="checkStability()">Перевірити стійкість</button>
+            </form>
+            
+            <div id="stability-result" class="result" style="display: none;">
+                <h3>Результати перевірки:</h3>
+                <p>Ударний струм КЗ (i<sub>уд</sub>): <span id="pulse-current" class="output-value"></span> кА</p>
+                <p>Значення теплового імпульсу (B<sub>K</sub>): <span id="thermal-impulse" class="output-value"></span> кА²·с</p>
+                <h4>Динамічна стійкість:</h4>
+                <p>Умова: i<sub>уд</sub> ≤ i<sub>дин</sub></p>
+                <p>Результат: <span id="dynamic-result" class="stability-result"></span></p>
+                <h4>Термічна стійкість:</h4>
+                <p>Умова: B<sub>K</sub> ≤ I<sub>т</sub>² × t<sub>т</sub></p>
+                <p>Результат: <span id="thermal-result" class="stability-result"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabContent, tabButtons;
+            
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+            
+            tabButtons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        function calculateThreePhase() {
+            const nominalVoltage = parseFloat(document.getElementById("nominal-voltage").value);
+            const totalImpedance = parseFloat(document.getElementById("total-impedance").value);
+            
+            if (!nominalVoltage || !totalImpedance) {
+                alert("Будь ласка, заповніть всі поля!");
+                return;
+            }
+            
+            const current = (nominalVoltage / (Math.sqrt(3) * totalImpedance));
+            
+            document.getElementById("threephase-current").textContent = current.toFixed(2);
+            document.getElementById("threephase-result").style.display = "block";
+        }
+        
+        function calculateSinglePhase() {
+            const phaseVoltage = parseFloat(document.getElementById("phase-voltage").value);
+            const z1 = parseFloat(document.getElementById("z1").value);
+            const z2 = parseFloat(document.getElementById("z2").value);
+            const z0 = parseFloat(document.getElementById("z0").value);
+            
+            if (!phaseVoltage || !z1 || !z2 || !z0) {
+                alert("Будь ласка, заповніть всі поля!");
+                return;
+            }
+            
+            const current = (3 * phaseVoltage) / (z1 + z2 + z0);
+            
+            document.getElementById("singlephase-current").textContent = current.toFixed(2);
+            document.getElementById("singlephase-result").style.display = "block";
+        }
+        
+        function checkStability() {
+            const shortCircuitCurrent = parseFloat(document.getElementById("short-circuit-current").value);
+            const pulseCoefficient = parseFloat(document.getElementById("pulse-coefficient").value);
+            const thermalTime = parseFloat(document.getElementById("thermal-time").value);
+            const dynamicStability = parseFloat(document.getElementById("dynamic-stability").value);
+            const thermalStability = parseFloat(document.getElementById("thermal-stability").value);
+            const thermalTimeEquipment = parseFloat(document.getElementById("thermal-time-equipment").value);
+            
+            if (!shortCircuitCurrent || !pulseCoefficient || !thermalTime || 
+                !dynamicStability || !thermalStability || !thermalTimeEquipment) {
+                alert("Будь ласка, заповніть всі поля!");
+                return;
+            }
+
+            const pulseCurrent = shortCircuitCurrent * Math.sqrt(2) * pulseCoefficient;
+
+            const thermalImpulse = Math.pow(shortCircuitCurrent, 2) * thermalTime;
+            
+            const isDynamicallyStable = pulseCurrent <= dynamicStability;
+
+            const thermalLimit = Math.pow(thermalStability, 2) * thermalTimeEquipment;
+            const isThermallyStable = thermalImpulse <= thermalLimit;
+
+            document.getElementById("pulse-current").textContent = pulseCurrent.toFixed(2);
+            document.getElementById("thermal-impulse").textContent = thermalImpulse.toFixed(2);
+            
+            const dynamicResult = document.getElementById("dynamic-result");
+            dynamicResult.textContent = isDynamicallyStable ? "ВІДПОВІДАЄ" : "НЕ ВІДПОВІДАЄ";
+            dynamicResult.className = isDynamicallyStable ? "stability-result stable" : "stability-result unstable";
+            
+            const thermalResult = document.getElementById("thermal-result");
+            thermalResult.textContent = isThermallyStable ? "ВІДПОВІДАЄ" : "НЕ ВІДПОВІДАЄ";
+            thermalResult.className = isThermallyStable ? "stability-result stable" : "stability-result unstable";
+            
+            document.getElementById("stability-result").style.display = "block";
+        }
+    </script>
+</body>
+</html>

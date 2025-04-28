@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор надійності систем електропередачі</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            background-color: #f1f1f1;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #ddd;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        h1, h2, h3 {
+            color: #2e7d32;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .input-item {
+            flex: 1;
+            min-width: 250px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result-section {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .formula {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+        #reliabilityConclusion {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор надійності систем електропередачі</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(this, 'reliability')">Порівняння надійності</div>
+            <div class="tab" onclick="openTab(this, 'losses')">Розрахунок збитків</div>
+        </div>
+        
+        <!-- Вкладка порівняння надійності -->
+        <div id="reliability-input" class="tab-content active">
+            <h2>Вхідні дані для порівняння надійності систем</h2>
+            
+            <div class="input-group">
+                <div class="input-item">
+                    <h3>Параметри інтенсивності відмов (1/рік)</h3>
+                    <label for="breaker110">Вимикач 110 кВ:</label>
+                    <input type="number" id="breaker110" value="0.02" step="0.001">
+                    
+                    <label for="line110">Лінія 110 кВ:</label>
+                    <input type="number" id="line110" value="0.08" step="0.001">
+                    
+                    <label for="transformer">Трансформатор:</label>
+                    <input type="number" id="transformer" value="0.03" step="0.001">
+                    
+                    <label for="breaker10">Вимикач 10 кВ:</label>
+                    <input type="number" id="breaker10" value="0.05" step="0.001">
+                    
+                    <label for="connections">Кабельне з'єднання 10 кВ:</label>
+                    <input type="number" id="connections" value="0.03" step="0.001">
+                    
+                    <label for="numConnections">Кількість з'єднань:</label>
+                    <input type="number" id="numConnections" value="1" min="1" step="1">
+                    
+                    <label for="sectionBreaker">Секційний вимикач:</label>
+                    <input type="number" id="sectionBreaker" value="0.01" step="0.001">
+                </div>
+                
+                <div class="input-item">
+                    <h3>Час відновлення (год)</h3>
+                    <label for="t_breaker110">Вимикач 110 кВ:</label>
+                    <input type="number" id="t_breaker110" value="25" step="0.5">
+                    
+                    <label for="t_line110">Лінія 110 кВ:</label>
+                    <input type="number" id="t_line110" value="16" step="0.5">
+                    
+                    <label for="t_transformer">Трансформатор:</label>
+                    <input type="number" id="t_transformer" value="120" step="0.5">
+                    
+                    <label for="t_breaker10">Вимикач 10 кВ:</label>
+                    <input type="number" id="t_breaker10" value="10" step="0.5">
+                    
+                    <label for="t_connections">Кабельне з'єднання 10 кВ:</label>
+                    <input type="number" id="t_connections" value="12" step="0.5">
+                    
+                    <h3>Плановий простій (год/рік)</h3>
+                    <label for="plannedOutage">Тривалість:</label>
+                    <input type="number" id="plannedOutage" value="28" step="0.5">
+                </div>
+            </div>
+            
+            <button onclick="calculateReliability()">Розрахувати</button>
+        </div>
+        
+        <div id="reliability-result" class="tab-content active">
+            <div class="result-section">
+                <h2>Результати порівняння надійності</h2>
+                
+                <table>
+                    <tr>
+                        <th>Параметр</th>
+                        <th>Одноколова система</th>
+                        <th>Двоколова система</th>
+                    </tr>
+                    <tr>
+                        <td>Інтенсивність відмов, 1/рік</td>
+                        <td id="failureRateOC">-</td>
+                        <td id="failureRateDC">-</td>
+                    </tr>
+                    <tr>
+                        <td>Середній час відновлення, год</td>
+                        <td id="recoveryTimeOC">-</td>
+                        <td id="recoveryTimeDC">-</td>
+                    </tr>
+                    <tr>
+                        <td>Коефіцієнт аварійного простою</td>
+                        <td id="emergencyOutageOC">-</td>
+                        <td id="emergencyOutageDC">-</td>
+                    </tr>
+                    <tr>
+                        <td>Коефіцієнт планового простою</td>
+                        <td id="plannedOutageOC">-</td>
+                        <td id="plannedOutageDC">-</td>
+                    </tr>
+                </table>
+                
+                <div id="reliabilityConclusion"><strong>Висновок:</strong> Виконайте розрахунок для порівняння систем</div>
+            </div>
+        </div>
+        
+        <!-- Вкладка розрахунку збитків -->
+        <div id="losses-input" class="tab-content">
+            <h2>Вхідні дані для розрахунку збитків</h2>
+            
+            <div class="input-group">
+                <div class="input-item">
+                    <h3>Параметри системи</h3>
+                    <label for="failureRate">Інтенсивність відмов, 1/рік:</label>
+                    <input type="number" id="failureRate" value="0.2" step="0.01">
+                    
+                    <label for="recoveryTime">Середній час відновлення, год:</label>
+                    <input type="number" id="recoveryTime" value="20" step="0.5">
+                    
+                    <label for="plannedOutageTime">Час планового простою, год/рік:</label>
+                    <input type="number" id="plannedOutageTime" value="28" step="0.5">
+                </div>
+                
+                <div class="input-item">
+                    <h3>Параметри навантаження</h3>
+                    <label for="maxLoad">Максимальне навантаження, МВт:</label>
+                    <input type="number" id="maxLoad" value="8" step="0.1">
+                    
+                    <label for="usageTime">Час використання макс. навантаження, год/рік:</label>
+                    <input type="number" id="usageTime" value="5000" step="10">
+                    
+                    <h3>Питомі збитки, грн/кВт·год</h3>
+                    <label for="emergencyLossRate">Від аварійного недовідпущення:</label>
+                    <input type="number" id="emergencyLossRate" value="25" step="0.1">
+                    
+                    <label for="plannedLossRate">Від планового недовідпущення:</label>
+                    <input type="number" id="plannedLossRate" value="15" step="0.1">
+                </div>
+            </div>
+            
+            <button onclick="calculateLosses()">Розрахувати збитки</button>
+        </div>
+        
+        <div id="losses-result" class="tab-content">
+            <div class="result-section">
+                <h2>Результати розрахунку збитків</h2>
+                
+                <h3>Формули розрахунку</h3>
+                <div>
+                    <p>Аварійне недовідпущення електроенергії:</p>
+                    <div class="formula">ΔWав = ω × τ × P_max × T_макс = <span id="w_failureRate"></span> × <span id="w_recoveryTime"></span> × <span id="w_maxLoad"></span> × <span id="w_usageTime"></span> = <span id="emergencyUndersupply"></span> кВт·год</div>
+                    
+                    <p>Планове недовідпущення електроенергії:</p>
+                    <div class="formula">ΔWпл = T_пл × P_max × T_макс = <span id="p_plannedOutage"></span> × <span id="p_maxLoad"></span> × <span id="p_usageTime"></span> = <span id="plannedUndersupply"></span> кВт·год</div>
+                    
+                    <p>Загальні збитки:</p>
+                    <div class="formula">З = y_ав × ΔWав + y_пл × ΔWпл = <span id="l_emergencyRate"></span> × <span id="l_emergencyUndersupply"></span> + <span id="l_plannedRate"></span> × <span id="l_plannedUndersupply"></span> = <span id="totalLosses"></span> грн</div>
+                </div>
+                
+                <h3>Підсумкові результати</h3>
+                <table>
+                    <tr>
+                        <th>Тип недовідпущення</th>
+                        <th>Обсяг, кВт·год</th>
+                        <th>Збитки, грн</th>
+                    </tr>
+                    <tr>
+                        <td>Аварійне</td>
+                        <td id="emergencyResult">-</td>
+                        <td id="emergencyLossResult">-</td>
+                    </tr>
+                    <tr>
+                        <td>Планове</td>
+                        <td id="plannedResult">-</td>
+                        <td id="plannedLossResult">-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Всього</strong></td>
+                        <td id="totalEnergyResult">-</td>
+                        <td id="totalResult">-</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openTab(clickedTab, tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            clickedTab.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tabName === 'reliability') {
+                document.getElementById('reliability-input').classList.add('active');
+                document.getElementById('reliability-result').classList.add('active');
+            } else {
+                document.getElementById('losses-input').classList.add('active');
+                document.getElementById('losses-result').classList.add('active');
+            }
+        }
+
+        function calculateReliability() {
+            // Отримання вхідних даних для одноколової системи
+            const w_breaker110 = parseFloat(document.getElementById('breaker110').value);
+            const w_line110 = parseFloat(document.getElementById('line110').value);
+            const w_transformer = parseFloat(document.getElementById('transformer').value);
+            const w_breaker10 = parseFloat(document.getElementById('breaker10').value);
+            const w_connection = parseFloat(document.getElementById('connections').value);
+            const numConnections = parseInt(document.getElementById('numConnections').value);
+            
+            // Час відновлення
+            const t_breaker110 = parseFloat(document.getElementById('t_breaker110').value);
+            const t_line110 = parseFloat(document.getElementById('t_line110').value);
+            const t_transformer = parseFloat(document.getElementById('t_transformer').value);
+            const t_breaker10 = parseFloat(document.getElementById('t_breaker10').value);
+            const t_connection = parseFloat(document.getElementById('t_connections').value);
+            
+            // Плановий простій
+            const plannedOutage = parseFloat(document.getElementById('plannedOutage').value);
+            
+            // Параметри двоколової системи
+            const w_sectionBreaker = parseFloat(document.getElementById('sectionBreaker').value);
+            
+            // Розрахунок параметрів одноколової системи
+            const w_oc = w_breaker110 + w_line110 + w_transformer + w_breaker10 + (w_connection * numConnections);
+            const t_oc = (w_breaker110 * t_breaker110 + w_line110 * t_line110 + w_transformer * t_transformer + 
+                        w_breaker10 * t_breaker10 + (w_connection * numConnections * t_connection)) / w_oc;
+            const k_emergency_oc = (w_oc * t_oc) * Math.pow(10, -3);
+            const k_planned_oc = 1.2 * (plannedOutage) * Math.pow(10, -3);
+            
+            // Розрахунок параметрів двоколової системи
+            const w_dk = 2 * w_oc * (k_emergency_oc + k_planned_oc);
+            const w_ds = w_dk + w_sectionBreaker;
+            const t_ds = t_oc * 0.7; // Припущення
+            const k_emergency_ds = (w_ds * t_ds) * Math.pow(10, -3);
+            const k_planned_ds = k_planned_oc * 0.8; // Припущення
+            
+            document.getElementById('failureRateOC').textContent = w_oc.toFixed(3);
+            document.getElementById('failureRateDC').textContent = w_ds.toFixed(4);
+            
+            document.getElementById('recoveryTimeOC').textContent = t_oc.toFixed(1);
+            document.getElementById('recoveryTimeDC').textContent = t_ds.toFixed(1);
+            
+            document.getElementById('emergencyOutageOC').textContent = k_emergency_oc.toExponential(2);
+            document.getElementById('emergencyOutageDC').textContent = k_emergency_ds.toExponential(2);
+            
+            document.getElementById('plannedOutageOC').textContent = k_planned_oc.toExponential(2);
+            document.getElementById('plannedOutageDC').textContent = k_planned_ds.toExponential(2);
+            
+            const conclusion = document.getElementById('reliabilityConclusion');
+            if (w_ds < w_oc) {
+                conclusion.innerHTML = '<strong>Висновок:</strong> Двоколова система електропередачі є значно надійнішою за одноколову';
+            } else {
+                conclusion.innerHTML = '<strong>Висновок:</strong> Одноколова система демонструє кращі показники надійності';
+            }
+        }
+
+        function calculateLosses() {
+            // Отримання вхідних даних
+            const failureRate = parseFloat(document.getElementById('failureRate').value);
+            const recoveryTime = parseFloat(document.getElementById('recoveryTime').value);
+            const plannedOutageTime = parseFloat(document.getElementById('plannedOutageTime').value);
+            const maxLoad = parseFloat(document.getElementById('maxLoad').value);
+            const usageTime = parseFloat(document.getElementById('usageTime').value);
+            const emergencyLossRate = parseFloat(document.getElementById('emergencyLossRate').value);
+            const plannedLossRate = parseFloat(document.getElementById('plannedLossRate').value);
+            
+            const recoveryTimeYears = recoveryTime * Math.pow(10, -3);
+            const plannedOutageYears = plannedOutageTime * Math.pow(10, -3);
+            
+            // Розрахунок аварійного недовідпущення
+            const emergencyUndersupply = failureRate * recoveryTimeYears * maxLoad * usageTime;
+            
+            // Розрахунок планового недовідпущення
+            const plannedUndersupply = plannedOutageYears * maxLoad * usageTime;
+            
+            // Розрахунок збитків
+            const emergencyLosses = emergencyLossRate * emergencyUndersupply;
+            const plannedLosses = plannedLossRate * plannedUndersupply;
+            const totalLosses = emergencyLosses + plannedLosses;
+            const totalEnergy = emergencyUndersupply + plannedUndersupply;
+            
+            // Заповнення формул
+            document.getElementById('w_failureRate').textContent = failureRate;
+            document.getElementById('w_recoveryTime').textContent = recoveryTimeYears.toExponential(2);
+            document.getElementById('w_maxLoad').textContent = maxLoad;
+            document.getElementById('w_usageTime').textContent = usageTime;
+            document.getElementById('emergencyUndersupply').textContent = emergencyUndersupply.toFixed(0);
+            
+            document.getElementById('p_plannedOutage').textContent = plannedOutageYears.toExponential(2);
+            document.getElementById('p_maxLoad').textContent = maxLoad;
+            document.getElementById('p_usageTime').textContent = usageTime;
+            document.getElementById('plannedUndersupply').textContent = plannedUndersupply.toFixed(0);
+            
+            document.getElementById('l_emergencyRate').textContent = emergencyLossRate;
+            document.getElementById('l_emergencyUndersupply').textContent = emergencyUndersupply.toFixed(0);
+            document.getElementById('l_plannedRate').textContent = plannedLossRate;
+            document.getElementById('l_plannedUndersupply').textContent = plannedUndersupply.toFixed(0);
+            document.getElementById('totalLosses').textContent = totalLosses.toFixed(0);
+            
+            // Заповнення таблиці 
+            document.getElementById('emergencyResult').textContent = emergencyUndersupply.toFixed(0);
+            document.getElementById('plannedResult').textContent = plannedUndersupply.toFixed(0);
+            document.getElementById('emergencyLossResult').textContent = emergencyLosses.toFixed(0);
+            document.getElementById('plannedLossResult').textContent = plannedLosses.toFixed(0);
+            document.getElementById('totalEnergyResult').textContent = totalEnergy.toFixed(0);
+            document.getElementById('totalResult').textContent = totalLosses.toFixed(0);
+        }
+
+        window.onload = function() {
+            // Імітація кліка по першій вкладці при завантаженні
+            const firstTab = document.querySelector('.tab');
+            openTab(firstTab, 'reliability');
+        };
+    </script>
+</body>
+</html>

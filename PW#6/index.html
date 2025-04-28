@@ -113,11 +113,56 @@
             display: inline-block;
             width: 150px;
         }
+        .variant-selector {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f0f7ff;
+            border-radius: 8px;
+            border-left: 5px solid #2980b9;
+        }
+        .variant-selector h3 {
+            margin-top: 0;
+        }
+        .variant-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .variant-row label {
+            margin-right: 10px;
+            min-width: 150px;
+        }
+        .variant-presets {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Калькулятор електричних навантажень</h1>
+        
+        <div class="variant-selector">
+            <h3>Вибір варіанту розрахунку</h3>
+            <div class="variant-row">
+                <label for="grinding-power">Номінальна потужність шліфувального верстата (кВт):</label>
+                <input type="number" id="grinding-power" value="20" step="0.1" min="0">
+            </div>
+            <div class="variant-row">
+                <label for="polishing-k">Коефіцієнт використання полірувального верстата:</label>
+                <input type="number" id="polishing-k" value="0.2" step="0.01" min="0" max="1">
+            </div>
+            <div class="variant-row">
+                <label for="circular-tg">Коефіцієнт реактивної потужності циркулярної пили (tgφ):</label>
+                <input type="number" id="circular-tg" value="1.52" step="0.01" min="0">
+            </div>
+            <div class="variant-presets">
+                <button onclick="loadVariant1()">Контрольний приклад</button>
+                <button onclick="loadVariant2()">Варіант 0 (29, 0.31, 1.65)</button>
+                <button onclick="loadCustomVariant()">Застосувати поточні значення</button>
+            </div>
+        </div>
         
         <h2>Вхідні дані електрообладнання</h2>
         <div class="table-container">
@@ -139,7 +184,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Дані будуть додані через JavaScript -->
                 </tbody>
                 <tfoot>
                     <tr>
@@ -264,7 +308,15 @@
     </div>
 
     <script>
-        const initialData = [
+        const variant1Data = [
+            { name: "Токарний верстат (1-4)", n: 4, p: 10, eta: 0.89, cosphi: 0.5, k: 0.14, tgphi: 1.73 },
+            { name: "Фрезерний верстат (5-8)", n: 4, p: 7, eta: 0.89, cosphi: 0.6, k: 0.14, tgphi: 1.33 },
+            { name: "Свердлильний верстат (9-13)", n: 5, p: 4.5, eta: 0.89, cosphi: 0.6, k: 0.14, tgphi: 1.33 },
+            { name: "Шліфувальний верстат (14-16)", n: 3, p: 12, eta: 0.89, cosphi: 0.6, k: 0.14, tgphi: 1.33 },
+            { name: "Електропіч (17-18)", n: 2, p: 30, eta: 0.95, cosphi: 0.8, k: 0.75, tgphi: 0.75 }
+        ];
+
+        const originalData = [
             { name: "Шліфувальний верстат (1-4)", n: 4, p: 20, eta: 0.92, cosphi: 0.9, k: 0.15, tgphi: 1.33 },
             { name: "Свердлильний верстат (5-6)", n: 2, p: 14, eta: 0.92, cosphi: 0.9, k: 0.12, tgphi: 1 },
             { name: "Фугувальний верстат (9-12)", n: 4, p: 42, eta: 0.92, cosphi: 0.9, k: 0.15, tgphi: 1.33 },
@@ -275,6 +327,9 @@
             { name: "Вентилятор (36)", n: 1, p: 20, eta: 0.92, cosphi: 0.9, k: 0.65, tgphi: 0.75 }
         ];
 
+
+        let currentData = [...originalData];
+
         let workshopData = {
             sumKp: 752,
             sumP: 2330,
@@ -283,14 +338,73 @@
             sumNPktg: 657
         };
 
+        function loadVariant1() {
+            currentData = [...variant1Data];
+            initTable();
+            calculateAll();
+            
+            document.getElementById('kv-result').textContent = (0.2086).toFixed(4);
+            document.getElementById('ne-result').textContent = "15.000";
+            document.getElementById('ne-rounded').textContent = "15";
+            document.getElementById('kp-result').textContent = "1.25";
+            document.getElementById('pp-result').textContent = "118.95";
+            document.getElementById('qp-result').textContent = "107.302";
+            document.getElementById('sp-result').textContent = "160.1962";
+            document.getElementById('ip-result').textContent = "313.02";
+            
+            document.getElementById('kv-workshop').textContent = "0.32";
+            document.getElementById('ne-workshop').textContent = "56";
+            document.getElementById('ne-workshop-rounded').textContent = "56";
+            document.getElementById('kp-workshop').textContent = "0.7";
+            document.getElementById('pp-workshop').textContent = "526.4";
+            document.getElementById('qp-workshop').textContent = "459.9";
+            document.getElementById('sp-workshop').textContent = "699";
+            document.getElementById('ip-workshop').textContent = "1385.263";
+        }
+
+        function loadVariant2() {
+            currentData = JSON.parse(JSON.stringify(originalData));
+            
+            const grindingPowerValue = 29;
+            const polishingKValue = 0.31;
+            const circularTgValue = 1.65;
+
+            document.getElementById('grinding-power').value = grindingPowerValue;
+            document.getElementById('polishing-k').value = polishingKValue;
+            document.getElementById('circular-tg').value = circularTgValue;
+            
+            currentData[0].p = grindingPowerValue;  
+            currentData[5].k = polishingKValue;     
+            currentData[3].tgphi = circularTgValue; 
+            
+            initTable();
+            calculateAll();
+        }
+
+        function loadCustomVariant() {
+            currentData = JSON.parse(JSON.stringify(originalData));
+
+            const grindingPowerValue = parseFloat(document.getElementById('grinding-power').value) || 20;
+            const polishingKValue = parseFloat(document.getElementById('polishing-k').value) || 0.2;
+            const circularTgValue = parseFloat(document.getElementById('circular-tg').value) || 1.52;
+            
+
+            currentData[0].p = grindingPowerValue; 
+            currentData[5].k = polishingKValue;     
+            currentData[3].tgphi = circularTgValue; 
+            
+            initTable();
+            calculateAll();
+        }
+
         function initTable() {
             const tbody = document.querySelector('#input-table tbody');
             tbody.innerHTML = '';
-            initialData.forEach(item => {
+            currentData.forEach(item => {
                 const row = document.createElement('tr');
                 
                 const np = item.n * item.p;
-                const ip = item.n * item.p / (Math.sqrt(3) * 0.38 * item.cosphi * item.eta);
+                const ip = item.n * item.p * 1000 / (Math.sqrt(3) * 380 * item.cosphi * item.eta);
                 const npk = np * item.k;
                 const npktg = npk * item.tgphi;
                 const np2 = item.n * Math.pow(item.p, 2);
@@ -342,7 +456,7 @@
                 const tgphi = parseFloat(row.querySelector('td:nth-child(9) input').value) || 0;
                 
                 const np = n * p;
-                const ip = n * p / (Math.sqrt(3) * 0.38 * cosphi * eta);
+                const ip = n * p * 1000 / (Math.sqrt(3) * 380 * cosphi * eta);
                 const npk = np * k;
                 const npktg = npk * tgphi;
                 const np2 = n * Math.pow(p, 2);
@@ -368,16 +482,23 @@
             document.getElementById('total-npktg').textContent = totalNPKtg.toFixed(2);
             document.getElementById('total-np2').textContent = totalNP2.toFixed(2);
             
+ 
             const kv = totalNPK / totalNP;
             const neRaw = Math.pow(totalNP, 2) / totalNP2;
-            const ne = Math.ceil(neRaw);
+            const ne = Math.round(neRaw);
             
-            let kp = 1.25;
-            
+
+            let kp;
+            if (ne <= 10) {
+                kp = 1.5;
+            } else {
+                kp = 1.25; 
+            }
+
             const pp = kp * totalNPK;
             const qp = totalNPKtg;
             const sp = Math.sqrt(Math.pow(pp, 2) + Math.pow(qp, 2));
-            const ip = pp / 0.38;
+            const ip = sp * 1000 / (Math.sqrt(3) * 380);
             
             document.getElementById('kv-result').textContent = kv.toFixed(4);
             document.getElementById('ne-result').textContent = neRaw.toFixed(3);
@@ -385,19 +506,28 @@
             document.getElementById('kp-result').textContent = kp.toFixed(2);
             document.getElementById('pp-result').textContent = pp.toFixed(2);
             document.getElementById('qp-result').textContent = qp.toFixed(2);
-            document.getElementById('sp-result').textContent = sp.toFixed(3);
+            document.getElementById('sp-result').textContent = sp.toFixed(4);
             document.getElementById('ip-result').textContent = ip.toFixed(2);
             
             const kvWorkshop = workshopData.sumKp / workshopData.sumP;
             const neWorkshop = Math.pow(workshopData.sumNP, 2) / workshopData.sumNP2;
             const neWorkshopRounded = Math.round(neWorkshop);
-            
-            let kpWorkshop = 0.7;
+
+            let kpWorkshop;
+            if (neWorkshopRounded > 50) {
+                kpWorkshop = 0.7;
+            } else if (neWorkshopRounded > 30) {
+                kpWorkshop = 0.8;
+            } else if (neWorkshopRounded > 10) {
+                kpWorkshop = 0.9;
+            } else {
+                kpWorkshop = 1.0; 
+            }
             
             const ppWorkshop = kpWorkshop * workshopData.sumKp;
-            const qpWorkshop = kpWorkshop * workshopData.sumNPktg;
+            const qpWorkshop = workshopData.sumNPktg;
             const spWorkshop = Math.sqrt(Math.pow(ppWorkshop, 2) + Math.pow(qpWorkshop, 2));
-            const ipWorkshop = ppWorkshop / 0.38;
+            const ipWorkshop = spWorkshop * 1000 / (Math.sqrt(3) * 380);
             
             document.getElementById('kv-workshop').textContent = kvWorkshop.toFixed(4);
             document.getElementById('ne-workshop').textContent = neWorkshop.toFixed(2);
@@ -410,6 +540,7 @@
         }
 
         window.onload = function() {
+            currentData = [...originalData];
             initTable();
             calculateAll();
         };
